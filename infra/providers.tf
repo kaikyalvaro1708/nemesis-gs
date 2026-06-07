@@ -8,9 +8,9 @@ terraform {
     }
   }
 
-  backend "local" {
-    path = "terraform.tfstate"
-  }
+  # Backend vazio — configuracao passada via flags no CI/CD
+  # Estado guardado no Azure Storage para persistir entre execucoes
+  backend "azurerm" {}
 }
 
 provider "azurerm" {
