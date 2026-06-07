@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEMESIS — Vigilância Orbital contra o Trabalho Escravo</title>
+  <meta name="description" content="NEMESIS usa imagens de satélite e visão computacional para detectar estruturas físicas associadas ao risco de trabalho escravo moderno.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;900&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Favicon — ícone na aba do navegador -->
+  <link rel="icon"             type="image/png" href="img/logo_nemesis.png">
+  <link rel="apple-touch-icon"                  href="img/logo_nemesis.png">
+</head>
+<body>
+
+  <!-- ─── HEADER ─────────────────────────────────────────────────── -->
+  <header id="header">
+    <div class="header-inner">
+      <a href="#" class="logo" aria-label="NEMESIS">
+        <img src="img/logo_nemesis.png" alt="" class="logo-img" aria-hidden="true">
+        <span class="logo-text">NEMESIS</span>
+      </a>
+
+      <button class="burger" id="burger" aria-label="Menu" aria-expanded="false" aria-controls="nav">
+        <span></span><span></span><span></span>
+      </button>
+
+      <nav id="nav">
+        <a href="#monitoramento" class="nav-link">Sistema</a>
+        <a href="#detector"      class="nav-link">Detecção</a>
+        <a href="#tecnologia"    class="nav-link">Tecnologia</a>
+        <a href="#impacto"       class="nav-link">Impacto</a>
+      </nav>
+    </div>
+  </header>
+
+
+  <!-- ─── HERO ──────────────────────────────────────────────────── -->
+  <section id="hero">
+    <canvas id="hero-canvas" aria-hidden="true"></canvas>
+
+    <div class="hero-body">
+      <img src="img/logo_nemesis.png" alt="NEMESIS" class="hero-logo">
+
+      <p class="hero-tag">Sistema de vigilância orbital · FIAP Global Solution 2026</p>
+
+      <h1 class="hero-title">NEMESIS</h1>
+
+      <p class="hero-desc">
+        Usamos imagens de satélite e visão computacional para detectar<br>
+        estruturas físicas associadas ao risco de trabalho escravo moderno.
+      </p>
+
+      <div class="hero-pills">
+        <span class="pill">Fornos de tijolo</span>
+        <span class="pill">Minas ilegais</span>
+        <span class="pill">Navios suspeitos</span>
+        <span class="pill">Acampamentos remotos</span>
+      </div>
+
+      <a href="#monitoramento" class="btn-hero">Ver painel ao vivo</a>
+    </div>
+
+    <!-- Indicador de scroll -->
+    <div class="scroll-hint" aria-hidden="true">
+      <span></span><span></span>
+    </div>
+  </section>
+
+
+  <!-- ─── PAINEL DE MONITORAMENTO (dados fictícios relevantes) ──── -->
+  <section id="monitoramento" class="section">
+    <div class="container">
+      <div class="section-head fade-in">
+        <span class="eyebrow">Telemetria ativa</span>
+        <h2>Painel de Monitoramento</h2>
+        <p class="section-desc">Status do sistema em tempo real — cobertura orbital e alertas ativos</p>
+      </div>
+
+      <div class="cards-3 fade-in">
+
+        <!-- Card 1: Status do sistema -->
+        <article class="card">
+          <div class="card-header">
+            <span class="card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/>
+              </svg>
+            </span>
+            <span class="status-badge status-badge--on">Operacional</span>
+          </div>
+          <h3 class="card-title">Cobertura Orbital</h3>
+          <div class="card-body">
+            <div class="stat-row">
+              <span class="stat-label">Satélites ativos</span>
+              <span class="stat-val">Sentinel-1A · 2A/B</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Última varredura</span>
+              <span class="stat-val stat-val--orange">14 min atrás</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Cobertura atual</span>
+              <span class="stat-val">94,2 %</span>
+            </div>
+            <div class="coverage-bar">
+              <div class="coverage-fill" style="width:94.2%"></div>
+            </div>
+          </div>
+          <p class="card-foot">ESA Copernicus · NASA Landsat-8 · revisita a cada 6 dias</p>
+        </article>
+
+        <!-- Card 2: Alertas ativos -->
+        <article class="card">
+          <div class="card-header">
+            <span class="card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+            </span>
+          </div>
+          <h3 class="card-title">Alertas Ativos</h3>
+          <div class="card-body">
+            <p class="alert-total">23</p>
+            <div class="alert-breakdown">
+              <div class="alert-row">
+                <span class="dot dot--red"></span>
+                <span class="alert-lbl">Alto risco</span>
+                <span class="alert-num">8</span>
+              </div>
+              <div class="alert-row">
+                <span class="dot dot--orange"></span>
+                <span class="alert-lbl">Médio risco</span>
+                <span class="alert-num">11</span>
+              </div>
+              <div class="alert-row">
+                <span class="dot dot--green"></span>
+                <span class="alert-lbl">Baixo risco</span>
+                <span class="alert-num">4</span>
+              </div>
+            </div>
+          </div>
+          <p class="card-foot">Gerados nas últimas 24h · sem dados pessoais</p>
+        </article>
+
+        <!-- Card 3: Detecções recentes -->
+        <article class="card">
+          <div class="card-header">
+            <span class="card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+            </span>
+          </div>
+          <h3 class="card-title">Detecções Recentes</h3>
+          <div class="card-body">
+            <div class="detection-list">
+              <div class="det-item">
+                <div class="det-dot det-dot--high"></div>
+                <div class="det-info">
+                  <span class="det-name">Embarcação irregular</span>
+                  <span class="det-meta">Pará · há 2h · Risco alto</span>
+                </div>
+              </div>
+              <div class="det-item">
+                <div class="det-dot det-dot--high"></div>
+                <div class="det-info">
+                  <span class="det-name">Acampamento remoto</span>
+                  <span class="det-meta">Amazonas · há 5h · Risco alto</span>
+                </div>
+              </div>
+              <div class="det-item">
+                <div class="det-dot det-dot--med"></div>
+                <div class="det-info">
+                  <span class="det-name">Garimpo clandestino</span>
+                  <span class="det-meta">Roraima · há 8h · Risco médio</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="card-foot">Estruturas físicas · nenhum dado individual coletado</p>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ─── SIMULADOR DE DETECÇÃO ─────────────────────────────────── -->
+  <section id="detector" class="section section-alt">
+    <div class="container container-wide">
+      <div class="section-head fade-in">
+        <span class="eyebrow">Módulo de análise</span>
+        <h2>Simulador de Detecção</h2>
+        <p class="section-desc">
+          O sistema analisa a imagem de satélite em janelas de 60×60m.
+          Para cada janela, a rede neural estima a probabilidade de estrutura suspeita.
+        </p>
+      </div>
+
+      <div class="detector-grid fade-in">
+
+        <!-- Canvas de imagem de satélite -->
+        <div class="det-canvas-wrap">
+          <div class="det-topbar">
+            <div class="det-topbar-l">
+              <span class="status-dot" id="det-dot"></span>
+              <span class="det-topbar-label" id="det-status-text">Aguardando início</span>
+            </div>
+            <span class="det-topbar-coords" id="det-coords">
+              Região: Norte do Brasil · 10m/px
+            </span>
+          </div>
+
+          <div class="canvas-frame">
+            <canvas id="detection-canvas" width="540" height="360"
+                    role="img" aria-label="Imagem de satélite da região em análise"></canvas>
+            <!-- Bounding boxes -->
+            <div id="bbox-layer" aria-live="polite"></div>
+            <!-- Cursor de patch -->
+            <div id="patch-cursor" aria-hidden="true"></div>
+          </div>
+
+          <div class="det-controls">
+            <button class="btn-scan" id="scan-btn">
+              <svg id="scan-icon" width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <polygon points="5,3 19,12 5,21"/>
+              </svg>
+              <span id="scan-label">Iniciar análise</span>
+            </button>
+            <div class="det-progress">
+              <div class="prog-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                <div class="prog-fill" id="prog-fill"></div>
+              </div>
+              <span class="det-pct" id="det-pct">0 / 54 janelas</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Painel do classificador -->
+        <div class="classifier">
+
+          <div class="clf-patch-info" id="clf-patch-info">
+            <div class="clf-patch-row">
+              <span class="eyebrow" style="margin:0">Janela atual</span>
+              <span class="clf-patch-num" id="clf-patch-num">—</span>
+            </div>
+            <p class="clf-patch-loc" id="clf-patch-loc">Aguardando análise…</p>
+          </div>
+
+          <div class="clf-bars-section">
+            <p class="clf-section-title">Probabilidade por classe</p>
+            <div class="clf-bars">
+              <div class="clf-bar-row" data-cls="normal">
+                <span class="clf-bar-label">Solo / Vegetação</span>
+                <div class="clf-track"><div class="clf-fill" id="fill-normal"></div></div>
+                <span class="clf-pct" id="pct-normal">0%</span>
+              </div>
+              <div class="clf-bar-row" data-cls="vessel">
+                <span class="clf-bar-label">Embarcação / Veículo</span>
+                <div class="clf-track"><div class="clf-fill" id="fill-vessel" style="--c:#3B82F6"></div></div>
+                <span class="clf-pct" id="pct-vessel">0%</span>
+              </div>
+              <div class="clf-bar-row" data-cls="struct">
+                <span class="clf-bar-label">Estrutura isolada</span>
+                <div class="clf-track"><div class="clf-fill" id="fill-struct" style="--c:#E8620A"></div></div>
+                <span class="clf-pct" id="pct-struct">0%</span>
+              </div>
+              <div class="clf-bar-row" data-cls="mining">
+                <span class="clf-bar-label">Atividade de mineração</span>
+                <div class="clf-track"><div class="clf-fill" id="fill-mining" style="--c:#EF4444"></div></div>
+                <span class="clf-pct" id="pct-mining">0%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="clf-result" id="clf-result">
+            <p class="clf-result-idle">Nenhuma janela analisada</p>
+          </div>
+
+          <div class="clf-log-section">
+            <p class="clf-section-title">Estruturas identificadas</p>
+            <div class="clf-log" id="clf-log">
+              <p class="clf-log-empty">Nenhuma detecção ainda</p>
+            </div>
+          </div>
+
+        </div><!-- /classifier -->
+      </div><!-- /detector-grid -->
+    </div>
+  </section>
+
+
+  <!-- ─── COMO FUNCIONA ─────────────────────────────────────────── -->
+  <section id="tecnologia" class="section">
+    <div class="container">
+      <div class="section-head fade-in">
+        <span class="eyebrow">Abordagem técnica</span>
+        <h2>Como funciona</h2>
+        <p class="section-desc">Da imagem orbital ao alerta — sem tocar em dados pessoais</p>
+      </div>
+
+      <div class="how-steps fade-in">
+        <div class="step">
+          <span class="step-num">01</span>
+          <span class="step-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M2 12h20M12 2a15 15 0 010 20"/>
+            </svg>
+          </span>
+          <h3>Captura orbital</h3>
+          <p>Satélites Sentinel-1/2 e Landsat-8 fotografam regiões de interesse com resolução de 10m por pixel, revisitando a cada 6 dias.</p>
+        </div>
+        <div class="step-arrow" aria-hidden="true">›</div>
+        <div class="step">
+          <span class="step-num">02</span>
+          <span class="step-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+              <rect x="2" y="3" width="20" height="14" rx="2"/>
+              <circle cx="12" cy="10" r="3"/>
+              <path d="M8 21h8M12 17v4"/>
+            </svg>
+          </span>
+          <h3>Análise por CNN</h3>
+          <p>Uma rede neural convolucional percorre a imagem em janelas de 60×60m, classificando cada região em categorias de risco baseadas em padrões físicos.</p>
+        </div>
+        <div class="step-arrow" aria-hidden="true">›</div>
+        <div class="step">
+          <span class="step-num">03</span>
+          <span class="step-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+              <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          </span>
+          <h3>Score de risco regional</h3>
+          <p>As detecções individuais são agregadas geograficamente, gerando um índice de risco por município — sem qualquer inferência sobre indivíduos.</p>
+        </div>
+        <div class="step-arrow" aria-hidden="true">›</div>
+        <div class="step">
+          <span class="step-num">04</span>
+          <span class="step-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+            </svg>
+          </span>
+          <h3>Alerta às autoridades</h3>
+          <p>Regiões com score elevado são sinalizadas para órgãos competentes — MTE, MPF, Polícia Federal — para investigação presencial.</p>
+        </div>
+      </div>
+
+      <!-- Grid de tecnologias -->
+      <div class="tech-grid fade-in">
+        <div class="tech-item">
+          <span class="tech-tag">Visão Computacional</span>
+          <p>CNN com janela deslizante sobre imagem SAR multiespectral</p>
+        </div>
+        <div class="tech-item">
+          <span class="tech-tag">Satélite ESA / NASA</span>
+          <p>Sentinel-2A/B e Landsat-8 · cobertura global em 10m/px</p>
+        </div>
+        <div class="tech-item">
+          <span class="tech-tag">Azure Cloud</span>
+          <p>App Service, Key Vault, App Insights · Terraform + GitHub Actions</p>
+        </div>
+        <div class="tech-item">
+          <span class="tech-tag">Score de Risco</span>
+          <p>Modelo de ML regional baseado em padrões físicos detectáveis</p>
+        </div>
+        <div class="tech-item">
+          <span class="tech-tag">Geoespacial</span>
+          <p>Geocodificação de detecções e geração de heat maps por região</p>
+        </div>
+        <div class="tech-item">
+          <span class="tech-tag">Privacidade by Design</span>
+          <p>Nenhum dado individual capturado — apenas padrões de infraestrutura</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ─── IMPACTO ────────────────────────────────────────────────── -->
+  <section id="impacto" class="section section-alt">
+    <div class="container">
+      <div class="section-head fade-in">
+        <span class="eyebrow">ONU Agenda 2030</span>
+        <h2>Impacto</h2>
+        <p class="section-desc">Tecnologia a serviço da dignidade humana</p>
+      </div>
+
+      <div class="ods-row fade-in">
+        <div class="ods-card">
+          <div class="ods-num">8</div>
+          <div class="ods-body">
+            <h3 class="ods-name">Trabalho Decente</h3>
+            <p class="ods-desc">Erradicação do trabalho forçado por detecção proativa de infraestrutura suspeita</p>
+          </div>
+        </div>
+        <div class="ods-card">
+          <div class="ods-num">10</div>
+          <div class="ods-body">
+            <h3 class="ods-name">Redução das Desigualdades</h3>
+            <p class="ods-desc">Proteção das populações vulneráveis por monitoramento contínuo e não invasivo</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="metrics fade-in">
+        <div class="metric-item">
+          <strong class="metric-val" data-target="40000000">0</strong>
+          <span class="metric-label">pessoas em situação de<br>trabalho forçado no mundo</span>
+          <span class="metric-src">OIT · Relatório 2024</span>
+        </div>
+        <div class="metric-sep"></div>
+        <div class="metric-item">
+          <strong class="metric-val" data-target="62671">0</strong>
+          <span class="metric-label">estruturas suspeitas<br>identificadas</span>
+          <span class="metric-src">NEMESIS Simulação v0.1</span>
+        </div>
+        <div class="metric-sep"></div>
+        <div class="metric-item">
+          <strong class="metric-val" data-target="47">0</strong>
+          <span class="metric-label">países sob<br>monitoramento</span>
+          <span class="metric-src">Cobertura Sentinel-2</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ─── FOOTER ─────────────────────────────────────────────────── -->
+  <footer id="footer">
+    <div class="container">
+      <div class="footer-top">
+        <a href="#" class="logo" aria-label="NEMESIS">
+          <img src="img/logo_nemesis.png" alt="" class="logo-img logo-img--sm" aria-hidden="true">
+          <span class="logo-text">NEMESIS</span>
+        </a>
+        <p class="footer-claim">FIAP Global Solution 2026 · Engenharia de Software</p>
+      </div>
+
+      <hr class="footer-hr">
+
+      <div class="footer-bottom">
+        <ul class="team-list" aria-label="Equipe">
+          <li>Integrante 1 — RM000000</li>
+          <li>Integrante 2 — RM000000</li>
+          <li>Integrante 3 — RM000000</li>
+          <li>Integrante 4 — RM000000</li>
+          <li>Integrante 5 — RM000000</li>
+        </ul>
+        <p class="footer-copy">
+          Dados orbitais:
+          <a href="https://sentinel.esa.int" target="_blank" rel="noopener">ESA Copernicus</a> ·
+          <a href="https://earthdata.nasa.gov" target="_blank" rel="noopener">NASA Earthdata</a>
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
