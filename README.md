@@ -85,8 +85,7 @@ nemesis/
 │   ├── main.tf                 ← Todos os recursos Azure
 │   ├── variables.tf            ← Variáveis configuráveis
 │   ├── outputs.tf              ← Valores retornados após o deploy
-│   ├── providers.tf            ← Configuração do provider Azure
-│   └── terraform.tfvars.example← Modelo de configuração (não committar o .tfvars real)
+│   └── providers.tf            ← Configuração do provider Azure
 │
 ├── .github/workflows/
 │   ├── ci.yml                  ← CI: valida o código a cada push

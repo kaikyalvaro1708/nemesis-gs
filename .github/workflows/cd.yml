@@ -55,7 +55,7 @@ jobs:
         run: |
           terraform plan \
             -out=tfplan \
-            -var="github_sp_object_id=${{ secrets.GITHUB_SP_OBJECT_ID }}" \
+            -var="github_sp_object_id=${{ secrets.SP_OBJECT_ID }}" \
             -var="alert_email=${{ secrets.ALERT_EMAIL }}"
 
       - name: "🚀 terraform apply"
