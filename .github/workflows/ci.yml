@@ -4,6 +4,7 @@ name: CI
 # Valida o codigo e simula o que o Terraform faria — sem criar nada.
 on:
   push:
+    branches-ignore: [main]
   pull_request:
     branches: [main]
 
