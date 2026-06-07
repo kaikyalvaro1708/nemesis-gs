@@ -1,7 +1,5 @@
 name: CD
 
-# Roda apenas quando o codigo chega na main.
-# Sobe a infraestrutura no Azure e publica o site automaticamente.
 on:
   push:
     branches: [main]
@@ -10,15 +8,12 @@ env:
   TF_VERSION:        "1.6.6"
   TF_WORKING_DIR:    "./infra"
   AZURE_WEBAPP_NAME: "nemesis-app"
-  APP_URL:           "https://nemesis-app.azurewebsites.net"
-  # Storage account onde o state do Terraform e guardado entre execucoes
   TF_STATE_SA:       "stnemesisgs26"
   TF_STATE_RG:       "rg-nemesis-tfstate"
 
 jobs:
   # ---------------------------------------------------------------------------
   # Job 0 - Verificacao de secrets
-  # Para o pipeline cedo com mensagem clara se algum secret estiver ausente
   # ---------------------------------------------------------------------------
   verificar-secrets:
     name: Verificar Secrets
@@ -42,15 +37,13 @@ jobs:
             fi
           done
           if [ $ERRO -ne 0 ]; then
-            echo ""
             echo "Adicione os secrets ausentes em: Settings > Secrets and variables > Actions"
             exit 1
           fi
           echo "Todos os secrets obrigatorios estao presentes."
 
   # ---------------------------------------------------------------------------
-  # Job 1 - Infraestrutura
-  # Cria o storage do state (se nao existir) e aplica o Terraform
+  # Job 1 - Infraestrutura (Terraform)
   # ---------------------------------------------------------------------------
   deploy-infra:
     name: Infraestrutura (Terraform)
@@ -96,8 +89,6 @@ jobs:
             --account-name ${{ env.TF_STATE_SA }} \
             --output none || true
 
-          echo "Storage de state pronto: ${{ env.TF_STATE_SA }}/tfstate"
-
       - name: Instalar Terraform ${{ env.TF_VERSION }}
         uses: hashicorp/setup-terraform@v3
         with:
@@ -138,11 +129,11 @@ jobs:
           echo "=================================="
 
   # ---------------------------------------------------------------------------
-  # Job 2 - Aplicacao
-  # Publica a pasta src/ no Azure App Service apos a infra estar no ar
+  # Job 2 - Deploy do frontend no Static Web App
+  # Token buscado via Azure CLI — sem precisar de secret adicional
   # ---------------------------------------------------------------------------
   deploy-app:
-    name: Aplicacao (Azure App Service)
+    name: Aplicacao (Azure Static Web App)
     runs-on: ubuntu-latest
     needs: deploy-infra
 
@@ -154,19 +145,42 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Deploy da pasta src/ no App Service
-        uses: azure/webapps-deploy@v3
+      - name: Login no Azure CLI
+        uses: azure/login@v1
         with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: "./src"
+          creds: '{"clientId":"${{ secrets.ARM_CLIENT_ID }}","clientSecret":"${{ secrets.ARM_CLIENT_SECRET }}","subscriptionId":"${{ secrets.ARM_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.ARM_TENANT_ID }}"}'
+
+      - name: Obter token de deploy
+        id: swa_token
+        run: |
+          TOKEN=$(az staticwebapp secrets list \
+            --name ${{ env.AZURE_WEBAPP_NAME }} \
+            --resource-group rg-nemesis \
+            --query "properties.apiKey" \
+            --output tsv)
+          echo "::add-mask::$TOKEN"
+          echo "api_token=$TOKEN" >> $GITHUB_OUTPUT
+
+      - name: Deploy da pasta src/ no Static Web App
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ steps.swa_token.outputs.api_token }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "src"
+          output_location: ""
 
       - name: Deploy concluido
         run: |
+          URL=$(az staticwebapp show \
+            --name ${{ env.AZURE_WEBAPP_NAME }} \
+            --resource-group rg-nemesis \
+            --query "defaultHostname" \
+            --output tsv)
           echo "=========================================="
           echo "   NEMESIS - Publicado com sucesso!       "
           echo "=========================================="
-          echo "  Acesse em: ${{ env.APP_URL }}"
+          echo "  Acesse em: https://$URL"
           echo "  Branch:    ${{ github.ref_name }}"
           echo "  Commit:    ${{ github.sha }}"
           echo "  Por:       ${{ github.actor }}"

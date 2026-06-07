@@ -1,11 +1,11 @@
 output "app_service_url" {
-  description = "URL pública do App Service"
-  value       = "https://${azurerm_linux_web_app.nemesis.default_hostname}"
+  description = "URL pública do Static Web App"
+  value       = "https://${azurerm_static_web_app.nemesis.default_host_name}"
 }
 
 output "app_service_hostname" {
-  description = "Hostname do App Service"
-  value       = azurerm_linux_web_app.nemesis.default_hostname
+  description = "Hostname do Static Web App"
+  value       = azurerm_static_web_app.nemesis.default_host_name
 }
 
 output "resource_group_name" {
@@ -20,6 +20,12 @@ output "app_insights_instrumentation_key" {
 }
 
 output "key_vault_uri" {
-  description = "URI do Key Vault (usar para referenciar segredos na aplicação)"
+  description = "URI do Key Vault"
   value       = azurerm_key_vault.nemesis.vault_uri
+}
+
+output "static_web_app_api_key" {
+  description = "API key para deploy no Static Web App"
+  value       = azurerm_static_web_app.nemesis.api_key
+  sensitive   = true
 }
