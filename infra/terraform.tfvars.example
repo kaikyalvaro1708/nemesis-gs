@@ -1,0 +1,9 @@
+# Copie este arquivo: cp terraform.tfvars.example terraform.tfvars
+# NUNCA commite o terraform.tfvars real (.gitignore já configurado)
+
+project_name        = "nemesis"
+location            = "East US"
+environment         = "production"
+app_service_sku     = "F1"
+github_sp_object_id = "OBJECT-ID-DO-SERVICE-PRINCIPAL"
+alert_email         = "seu-email@dominio.com"

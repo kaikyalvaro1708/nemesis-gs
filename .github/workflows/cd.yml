@@ -1,0 +1,111 @@
+name: CD
+
+# Roda apenas quando o código chega na main.
+# Sobe a infraestrutura no Azure e publica o site automaticamente.
+on:
+  push:
+    branches: [main]
+
+env:
+  TF_VERSION:        "1.6.6"
+  TF_WORKING_DIR:    "./infra"
+  AZURE_WEBAPP_NAME: "nemesis-app"
+  APP_URL:           "https://nemesis-app.azurewebsites.net"
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Job 1 — Infraestrutura
+  # Garante que todos os 9 recursos Azure estão criados e atualizados
+  # ---------------------------------------------------------------------------
+  deploy-infra:
+    name: "☁️ Infraestrutura (Terraform)"
+    runs-on: ubuntu-latest
+
+    # Evita que dois deploys de infra rodem ao mesmo tempo
+    concurrency:
+      group: terraform
+      cancel-in-progress: false
+
+    # Credenciais Azure disponíveis para todos os steps deste job
+    env:
+      ARM_CLIENT_ID:       ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET:   ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID:       ${{ secrets.ARM_TENANT_ID }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "⚙️ Instalar Terraform ${{ env.TF_VERSION }}"
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: "🔧 terraform init"
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform init -upgrade
+
+      - name: "✅ terraform validate"
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform validate
+
+      - name: "📋 terraform plan"
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          terraform plan \
+            -out=tfplan \
+            -var="github_sp_object_id=${{ secrets.GITHUB_SP_OBJECT_ID }}" \
+            -var="alert_email=${{ secrets.ALERT_EMAIL }}"
+
+      - name: "🚀 terraform apply"
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform apply -auto-approve tfplan
+
+      - name: "📊 Outputs"
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          echo "=================================="
+          echo "  Infraestrutura provisionada ✅  "
+          echo "=================================="
+          terraform output app_service_url
+          terraform output resource_group_name
+          echo "=================================="
+
+  # ---------------------------------------------------------------------------
+  # Job 2 — Aplicação
+  # Publica a pasta src/ no Azure App Service após a infra estar no ar
+  # ---------------------------------------------------------------------------
+  deploy-app:
+    name: "🚀 Aplicação (Azure App Service)"
+    runs-on: ubuntu-latest
+    needs: deploy-infra  # só roda depois que a infra estiver pronta
+
+    # Evita deploys paralelos conflitantes
+    concurrency:
+      group: app-deploy
+      cancel-in-progress: false
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🚀 Deploy da pasta src/ no App Service"
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: "./src"
+
+      - name: "🌐 Deploy concluído"
+        run: |
+          echo "=========================================="
+          echo "   NEMESIS — Publicado com sucesso! 🛰️   "
+          echo "=========================================="
+          echo ""
+          echo "  Acesse em: ${{ env.APP_URL }}"
+          echo "  Branch:    ${{ github.ref_name }}"
+          echo "  Commit:    ${{ github.sha }}"
+          echo "  Por:       ${{ github.actor }}"
+          echo ""
+          echo "=========================================="
