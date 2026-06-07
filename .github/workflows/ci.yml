@@ -1,7 +1,7 @@
 name: CI
 
 # Roda em todo push, em qualquer branch.
-# Garante que o código está correto antes de chegar na main.
+# Garante que o codigo esta correto antes de chegar na main.
 on:
   push:
   pull_request:
@@ -9,30 +9,30 @@ on:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Job 1 — Valida os arquivos Terraform
-  # Checa a formatação sem precisar de credenciais Azure
+  # Job 1 - Valida os arquivos Terraform
+  # Checa a formatacao sem precisar de credenciais Azure
   # ---------------------------------------------------------------------------
   validar-terraform:
     name: Validar Terraform (fmt)
     runs-on: ubuntu-latest
 
     steps:
-      - name: "📥 Checkout"
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: "⚙️ Instalar Terraform"
+      - name: Instalar Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.6.6"
 
-      - name: "📐 Verificar formatação (terraform fmt)"
+      - name: Verificar formatacao (terraform fmt)
         working-directory: ./infra
         run: |
           terraform fmt -check -recursive
-          echo "✅ Formatação dos arquivos .tf está correta"
+          echo "Formatacao dos arquivos .tf esta correta"
 
   # ---------------------------------------------------------------------------
-  # Job 2 — Valida os arquivos do frontend
+  # Job 2 - Valida os arquivos do frontend
   # Confirma que os arquivos essenciais existem antes de qualquer deploy
   # ---------------------------------------------------------------------------
   validar-frontend:
@@ -40,28 +40,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: "📥 Checkout"
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: "🔍 Verificar arquivos essenciais"
+      - name: Verificar arquivos essenciais
         run: |
           echo "Verificando arquivos do frontend..."
           ERRO=0
 
           for ARQUIVO in src/index.html src/style.css src/app.js; do
             if [ -f "$ARQUIVO" ]; then
-              echo "✅ $ARQUIVO encontrado"
+              echo "OK: $ARQUIVO encontrado"
             else
-              echo "❌ $ARQUIVO NÃO encontrado"
+              echo "ERRO: $ARQUIVO NAO encontrado"
               ERRO=1
             fi
           done
 
           if [ $ERRO -ne 0 ]; then
             echo ""
-            echo "Deploy cancelado: um ou mais arquivos obrigatórios estão ausentes."
+            echo "Deploy cancelado: um ou mais arquivos obrigatorios estao ausentes."
             exit 1
           fi
 
           echo ""
-          echo "✅ Todos os arquivos do frontend estão presentes."
+          echo "Todos os arquivos do frontend estao presentes."
