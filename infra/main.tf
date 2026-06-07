@@ -82,13 +82,6 @@ resource "azurerm_key_vault" "nemesis" {
     secret_permissions = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
   }
 
-  # Permite que o GitHub Actions SP apenas leia os segredos
-  access_policy {
-    tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = var.github_sp_object_id
-
-    secret_permissions = ["Get", "List"]
-  }
 }
 
 resource "azurerm_key_vault_secret" "sentinel_api_key" {
