@@ -21,12 +21,22 @@ resource "azurerm_service_plan" "nemesis" {
   tags                = local.tags
 }
 
+resource "azurerm_log_analytics_workspace" "nemesis" {
+  name                = "law-${var.project_name}"
+  resource_group_name = azurerm_resource_group.nemesis.name
+  location            = azurerm_resource_group.nemesis.location
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+  tags                = local.tags
+}
+
 resource "azurerm_application_insights" "nemesis" {
   name                = "ai-${var.project_name}"
   resource_group_name = azurerm_resource_group.nemesis.name
   location            = azurerm_resource_group.nemesis.location
   application_type    = "web"
   retention_in_days   = 30
+  workspace_id        = azurerm_log_analytics_workspace.nemesis.id
   tags                = local.tags
 }
 
@@ -65,7 +75,7 @@ resource "azurerm_linux_web_app" "nemesis" {
 data "azurerm_client_config" "current" {}
 
 resource "azurerm_key_vault" "nemesis" {
-  name                       = "kv-${var.project_name}-gs26"
+  name                       = "kv-${var.project_name}-gs"
   resource_group_name        = azurerm_resource_group.nemesis.name
   location                   = azurerm_resource_group.nemesis.location
   tenant_id                  = data.azurerm_client_config.current.tenant_id
