@@ -105,6 +105,19 @@ resource "azurerm_key_vault_secret" "sentinel_api_key" {
 }
 
 # -----------------------------------------------------------------------------
+# IAM — Role Assignment (requisito de seguranca do trabalho)
+# Concede ao Service Principal permissao de leitura de segredos no Key Vault
+# Role: Key Vault Secrets User (leitura sem permissao de escrita)
+# -----------------------------------------------------------------------------
+resource "azurerm_role_assignment" "sp_kv_secrets_user" {
+  scope                = azurerm_key_vault.nemesis.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = data.azurerm_client_config.current.object_id
+
+  depends_on = [azurerm_key_vault.nemesis]
+}
+
+# -----------------------------------------------------------------------------
 # Monitoramento — Action Group + Alert Rule (erros HTTP 5xx)
 # -----------------------------------------------------------------------------
 resource "azurerm_monitor_action_group" "nemesis_alerts" {
