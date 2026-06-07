@@ -14,12 +14,46 @@ env:
 
 jobs:
   # ---------------------------------------------------------------------------
+  # Job 0 - Verificacao de secrets
+  # Para o pipeline cedo com mensagem clara se algum secret estiver ausente
+  # ---------------------------------------------------------------------------
+  verificar-secrets:
+    name: Verificar Secrets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checar secrets obrigatorios
+        env:
+          CHECK_ARM_CLIENT_ID:       ${{ secrets.ARM_CLIENT_ID }}
+          CHECK_ARM_CLIENT_SECRET:   ${{ secrets.ARM_CLIENT_SECRET }}
+          CHECK_ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          CHECK_ARM_TENANT_ID:       ${{ secrets.ARM_TENANT_ID }}
+          CHECK_ALERT_EMAIL:         ${{ secrets.ALERT_EMAIL }}
+        run: |
+          ERRO=0
+          for VAR in CHECK_ARM_CLIENT_ID CHECK_ARM_CLIENT_SECRET CHECK_ARM_SUBSCRIPTION_ID CHECK_ARM_TENANT_ID CHECK_ALERT_EMAIL; do
+            if [ -z "${!VAR}" ]; then
+              echo "AUSENTE: $VAR nao esta definido nos Secrets do repositorio"
+              ERRO=1
+            else
+              echo "OK: $VAR definido"
+            fi
+          done
+          if [ $ERRO -ne 0 ]; then
+            echo ""
+            echo "Adicione os secrets ausentes em: Settings > Secrets and variables > Actions"
+            exit 1
+          fi
+          echo ""
+          echo "Todos os secrets obrigatorios estao presentes."
+
+  # ---------------------------------------------------------------------------
   # Job 1 - Infraestrutura
   # Garante que todos os 9 recursos Azure estao criados e atualizados
   # ---------------------------------------------------------------------------
   deploy-infra:
     name: Infraestrutura (Terraform)
     runs-on: ubuntu-latest
+    needs: verificar-secrets
 
     # Evita que dois deploys de infra rodem ao mesmo tempo
     concurrency:
@@ -55,7 +89,6 @@ jobs:
         run: |
           terraform plan \
             -out=tfplan \
-            -var="github_sp_object_id=${{ secrets.SP_OBJECT_ID }}" \
             -var="alert_email=${{ secrets.ALERT_EMAIL }}"
 
       - name: terraform apply
