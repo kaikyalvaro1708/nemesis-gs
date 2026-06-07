@@ -11,6 +11,9 @@ env:
   TF_WORKING_DIR:    "./infra"
   AZURE_WEBAPP_NAME: "nemesis-app"
   APP_URL:           "https://nemesis-app.azurewebsites.net"
+  # Storage account onde o state do Terraform e guardado entre execucoes
+  TF_STATE_SA:       "stnemesisgs26"
+  TF_STATE_RG:       "rg-nemesis-tfstate"
 
 jobs:
   # ---------------------------------------------------------------------------
@@ -43,24 +46,21 @@ jobs:
             echo "Adicione os secrets ausentes em: Settings > Secrets and variables > Actions"
             exit 1
           fi
-          echo ""
           echo "Todos os secrets obrigatorios estao presentes."
 
   # ---------------------------------------------------------------------------
   # Job 1 - Infraestrutura
-  # Garante que todos os 9 recursos Azure estao criados e atualizados
+  # Cria o storage do state (se nao existir) e aplica o Terraform
   # ---------------------------------------------------------------------------
   deploy-infra:
     name: Infraestrutura (Terraform)
     runs-on: ubuntu-latest
     needs: verificar-secrets
 
-    # Evita que dois deploys de infra rodem ao mesmo tempo
     concurrency:
       group: terraform
       cancel-in-progress: false
 
-    # Credenciais Azure disponiveis para todos os steps deste job
     env:
       ARM_CLIENT_ID:       ${{ secrets.ARM_CLIENT_ID }}
       ARM_CLIENT_SECRET:   ${{ secrets.ARM_CLIENT_SECRET }}
@@ -71,6 +71,33 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Login no Azure CLI
+        uses: azure/login@v1
+        with:
+          creds: '{"clientId":"${{ secrets.ARM_CLIENT_ID }}","clientSecret":"${{ secrets.ARM_CLIENT_SECRET }}","subscriptionId":"${{ secrets.ARM_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.ARM_TENANT_ID }}"}'
+
+      - name: Criar storage para o Terraform state (idempotente)
+        run: |
+          az group create \
+            --name ${{ env.TF_STATE_RG }} \
+            --location brazilsouth \
+            --output none || true
+
+          az storage account create \
+            --name ${{ env.TF_STATE_SA }} \
+            --resource-group ${{ env.TF_STATE_RG }} \
+            --location brazilsouth \
+            --sku Standard_LRS \
+            --allow-blob-public-access false \
+            --output none || true
+
+          az storage container create \
+            --name tfstate \
+            --account-name ${{ env.TF_STATE_SA }} \
+            --output none || true
+
+          echo "Storage de state pronto: ${{ env.TF_STATE_SA }}/tfstate"
+
       - name: Instalar Terraform ${{ env.TF_VERSION }}
         uses: hashicorp/setup-terraform@v3
         with:
@@ -78,7 +105,12 @@ jobs:
 
       - name: terraform init
         working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform init -upgrade
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ env.TF_STATE_RG }}" \
+            -backend-config="storage_account_name=${{ env.TF_STATE_SA }}" \
+            -backend-config="container_name=tfstate" \
+            -backend-config="key=nemesis.terraform.tfstate"
 
       - name: terraform validate
         working-directory: ${{ env.TF_WORKING_DIR }}
@@ -114,7 +146,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: deploy-infra
 
-    # Evita deploys paralelos conflitantes
     concurrency:
       group: app-deploy
       cancel-in-progress: false
@@ -135,10 +166,8 @@ jobs:
           echo "=========================================="
           echo "   NEMESIS - Publicado com sucesso!       "
           echo "=========================================="
-          echo ""
           echo "  Acesse em: ${{ env.APP_URL }}"
           echo "  Branch:    ${{ github.ref_name }}"
           echo "  Commit:    ${{ github.sha }}"
           echo "  Por:       ${{ github.actor }}"
-          echo ""
           echo "=========================================="
