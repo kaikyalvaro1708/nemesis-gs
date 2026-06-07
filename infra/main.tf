@@ -12,15 +12,23 @@ resource "azurerm_resource_group" "nemesis" {
   tags     = local.tags
 }
 
-resource "azurerm_service_plan" "nemesis" {
-  name                = "plan-${var.project_name}"
+# -----------------------------------------------------------------------------
+# Static Web App — hospeda o frontend estatico (HTML/CSS/JS)
+# Tier Free: HTTPS nativo, CDN global, deploy via GitHub Actions
+# Nao requer VM — funciona em qualquer subscription Azure
+# -----------------------------------------------------------------------------
+resource "azurerm_static_web_app" "nemesis" {
+  name                = "${var.project_name}-app"
   resource_group_name = azurerm_resource_group.nemesis.name
-  location            = azurerm_resource_group.nemesis.location
-  os_type             = "Linux"
-  sku_name            = var.app_service_sku
+  location            = "eastus2"
+  sku_tier            = "Free"
+  sku_size            = "Free"
   tags                = local.tags
 }
 
+# -----------------------------------------------------------------------------
+# Monitoramento — Log Analytics Workspace + Application Insights
+# -----------------------------------------------------------------------------
 resource "azurerm_log_analytics_workspace" "nemesis" {
   name                = "law-${var.project_name}"
   resource_group_name = azurerm_resource_group.nemesis.name
@@ -40,42 +48,13 @@ resource "azurerm_application_insights" "nemesis" {
   tags                = local.tags
 }
 
-resource "azurerm_linux_web_app" "nemesis" {
-  name                = "${var.project_name}-app"
-  resource_group_name = azurerm_resource_group.nemesis.name
-  location            = azurerm_resource_group.nemesis.location
-  service_plan_id     = azurerm_service_plan.nemesis.id
-  https_only          = true
-
-  site_config {
-    application_stack {
-      node_version = "18-lts"
-    }
-    always_on           = false
-    ftps_state          = "Disabled"
-    minimum_tls_version = "1.2"
-    http2_enabled       = true
-  }
-
-  app_settings = {
-    "APPINSIGHTS_INSTRUMENTATIONKEY"             = azurerm_application_insights.nemesis.instrumentation_key
-    "APPLICATIONINSIGHTS_CONNECTION_STRING"      = azurerm_application_insights.nemesis.connection_string
-    "ApplicationInsightsAgent_EXTENSION_VERSION" = "~3"
-    "NODE_ENV"                                   = var.environment
-    "WEBSITE_RUN_FROM_PACKAGE"                   = "1"
-  }
-
-  tags = local.tags
-}
-
 # -----------------------------------------------------------------------------
 # Key Vault — armazena segredos (chave da API Sentinel Hub)
-# Nome precisa ser globalmente único no Azure: adicione sufixo se já existir
 # -----------------------------------------------------------------------------
 data "azurerm_client_config" "current" {}
 
 resource "azurerm_key_vault" "nemesis" {
-  name                       = "kv-${var.project_name}-gs"
+  name                       = "kv-${var.project_name}-swd26"
   resource_group_name        = azurerm_resource_group.nemesis.name
   location                   = azurerm_resource_group.nemesis.location
   tenant_id                  = data.azurerm_client_config.current.tenant_id
@@ -84,14 +63,12 @@ resource "azurerm_key_vault" "nemesis" {
   purge_protection_enabled   = false
   tags                       = local.tags
 
-  # Permite que o usuário/SP que executa o Terraform gerencie segredos
   access_policy {
     tenant_id = data.azurerm_client_config.current.tenant_id
     object_id = data.azurerm_client_config.current.object_id
 
     secret_permissions = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
   }
-
 }
 
 resource "azurerm_key_vault_secret" "sentinel_api_key" {
@@ -105,20 +82,7 @@ resource "azurerm_key_vault_secret" "sentinel_api_key" {
 }
 
 # -----------------------------------------------------------------------------
-# IAM — Role Assignment (requisito de seguranca do trabalho)
-# Concede ao Service Principal permissao de leitura de segredos no Key Vault
-# Role: Key Vault Secrets User (leitura sem permissao de escrita)
-# -----------------------------------------------------------------------------
-resource "azurerm_role_assignment" "sp_kv_secrets_user" {
-  scope                = azurerm_key_vault.nemesis.id
-  role_definition_name = "Key Vault Secrets User"
-  principal_id         = data.azurerm_client_config.current.object_id
-
-  depends_on = [azurerm_key_vault.nemesis]
-}
-
-# -----------------------------------------------------------------------------
-# Monitoramento — Action Group + Alert Rule (erros HTTP 5xx)
+# Monitoramento — Action Group + Alert Rule
 # -----------------------------------------------------------------------------
 resource "azurerm_monitor_action_group" "nemesis_alerts" {
   name                = "ag-${var.project_name}-alerts"
@@ -133,21 +97,21 @@ resource "azurerm_monitor_action_group" "nemesis_alerts" {
   }
 }
 
-resource "azurerm_monitor_metric_alert" "http_errors" {
-  name                = "alert-http-5xx"
+resource "azurerm_monitor_metric_alert" "request_failures" {
+  name                = "alert-request-failures"
   resource_group_name = azurerm_resource_group.nemesis.name
-  scopes              = [azurerm_linux_web_app.nemesis.id]
-  description         = "NEMESIS: mais de 10 erros HTTP 5xx em 5 minutos"
-  severity            = 1      # Critical
-  frequency           = "PT1M" # avalia a cada 1 minuto
-  window_size         = "PT5M" # janela de agregação: 5 minutos
+  scopes              = [azurerm_application_insights.nemesis.id]
+  description         = "NEMESIS: mais de 10 requisicoes com falha em 5 minutos"
+  severity            = 1
+  frequency           = "PT1M"
+  window_size         = "PT5M"
   enabled             = true
   tags                = local.tags
 
   criteria {
-    metric_namespace = "Microsoft.Web/sites"
-    metric_name      = "Http5xx"
-    aggregation      = "Total"
+    metric_namespace = "microsoft.insights/components"
+    metric_name      = "requests/failed"
+    aggregation      = "Count"
     operator         = "GreaterThan"
     threshold        = 10
   }
