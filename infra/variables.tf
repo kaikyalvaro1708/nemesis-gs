@@ -7,7 +7,7 @@ variable "project_name" {
 variable "location" {
   description = "Região Azure"
   type        = string
-  default     = "eastus"
+  default     = "brazilsouth"
 }
 
 variable "environment" {
