@@ -7,7 +7,7 @@ variable "project_name" {
 variable "location" {
   description = "Região Azure"
   type        = string
-  default     = "East US"
+  default     = "brazilsouth"
 }
 
 variable "environment" {
@@ -20,11 +20,6 @@ variable "app_service_sku" {
   description = "SKU do App Service Plan (F1 = free)"
   type        = string
   default     = "F1"
-}
-
-variable "github_sp_object_id" {
-  description = "Object ID do Service Principal do GitHub Actions"
-  type        = string
 }
 
 variable "alert_email" {

@@ -58,12 +58,6 @@ resource "azurerm_linux_web_app" "nemesis" {
   tags = local.tags
 }
 
-resource "azurerm_role_assignment" "github_contributor" {
-  scope                = azurerm_resource_group.nemesis.id
-  role_definition_name = "Contributor"
-  principal_id         = var.github_sp_object_id
-}
-
 # -----------------------------------------------------------------------------
 # Key Vault — armazena segredos (chave da API Sentinel Hub)
 # Nome precisa ser globalmente único no Azure: adicione sufixo se já existir
