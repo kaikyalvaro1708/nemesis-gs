@@ -17,9 +17,9 @@ variable "environment" {
 }
 
 variable "app_service_sku" {
-  description = "SKU do App Service Plan (F1 = free)"
+  description = "SKU do App Service Plan (B1 = Basic pago, usa creditos Azure)"
   type        = string
-  default     = "F1"
+  default     = "B1"
 }
 
 variable "alert_email" {
