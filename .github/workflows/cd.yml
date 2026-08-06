@@ -129,8 +129,10 @@ jobs:
           echo "=================================="
 
   # ---------------------------------------------------------------------------
-  # Job 2 - Deploy do frontend no Static Web App
-  # Token buscado via Azure CLI — sem precisar de secret adicional
+  # Job 2 - Aplicacao
+  # Publica a pasta src/ no Azure App Service apos a infra estar no ar.
+  # Se o App Service nao existir (ex.: infra foi destruida em main.tf), o
+  # job termina com sucesso sem tentar publicar em um recurso inexistente.
   # ---------------------------------------------------------------------------
   deploy-app:
     name: Aplicacao (Azure Static Web App)
@@ -141,6 +143,12 @@ jobs:
       group: app-deploy
       cancel-in-progress: false
 
+    env:
+      ARM_CLIENT_ID:       ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET:   ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID:       ${{ secrets.ARM_TENANT_ID }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -150,19 +158,20 @@ jobs:
         with:
           creds: '{"clientId":"${{ secrets.ARM_CLIENT_ID }}","clientSecret":"${{ secrets.ARM_CLIENT_SECRET }}","subscriptionId":"${{ secrets.ARM_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.ARM_TENANT_ID }}"}'
 
-      - name: Obter token de deploy
-        id: swa_token
+      - name: Verificar se o App Service existe
+        id: check-app
         run: |
-          TOKEN=$(az staticwebapp secrets list \
-            --name ${{ env.AZURE_WEBAPP_NAME }} \
-            --resource-group rg-nemesis \
-            --query "properties.apiKey" \
-            --output tsv)
-          echo "::add-mask::$TOKEN"
-          echo "api_token=$TOKEN" >> $GITHUB_OUTPUT
+          if az webapp show --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group rg-nemesis > /dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "App Service ${{ env.AZURE_WEBAPP_NAME }} encontrado — prosseguindo com o deploy."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "App Service ${{ env.AZURE_WEBAPP_NAME }} nao encontrado — infra foi destruida (ou ainda nao provisionada). Nada para publicar, pulando deploy."
+          fi
 
-      - name: Deploy da pasta src/ no Static Web App
-        uses: Azure/static-web-apps-deploy@v1
+      - name: Deploy da pasta src/ no App Service
+        if: steps.check-app.outputs.exists == 'true'
+        uses: azure/webapps-deploy@v3
         with:
           azure_static_web_apps_api_token: ${{ steps.swa_token.outputs.api_token }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -171,6 +180,7 @@ jobs:
           output_location: ""
 
       - name: Deploy concluido
+        if: steps.check-app.outputs.exists == 'true'
         run: |
           URL=$(az staticwebapp show \
             --name ${{ env.AZURE_WEBAPP_NAME }} \
