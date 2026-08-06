@@ -7,19 +7,13 @@ variable "project_name" {
 variable "location" {
   description = "Região Azure"
   type        = string
-  default     = "eastus"
+  default     = "brazilsouth"
 }
 
 variable "environment" {
   description = "Ambiente de deploy"
   type        = string
   default     = "production"
-}
-
-variable "app_service_sku" {
-  description = "SKU do App Service Plan (F1 = free)"
-  type        = string
-  default     = "F1"
 }
 
 variable "alert_email" {
