@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.6.0"
+  required_version = ">= 1.7.0" # blocos `removed` (infra/removed.tf) exigem 1.7+
 
   required_providers {
     azurerm = {
