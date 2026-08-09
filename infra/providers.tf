@@ -16,5 +16,13 @@ terraform {
 provider "azurerm" {
   skip_provider_registration = true
 
-  features {}
+  features {
+    resource_group {
+      # O Application Insights cria sozinho um Action Group
+      # ("Application Insights Smart Detection") dentro do RG, fora do
+      # nosso controle/state. Sem isso, o destroy do resource group falha
+      # porque acha esse recurso "nao gerenciado" la dentro.
+      prevent_deletion_if_contains_resources = false
+    }
+  }
 }
